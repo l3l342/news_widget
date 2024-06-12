@@ -25,26 +25,20 @@ async function buildWidget() {
     const hstack = widget.addStack();
     hstack.layoutVertically();
     
-    widget = createArticel(widget, 1);
+    widget = createArticel(widget, load_data(2) );
 
     
     return widget;
 }
 
-async function createArticel(widget, n){
-    //data
-    const raw_data = await get_data();
-
-    if (data[n] === undefined) {
-        n++;
-    }
-    const data = raw_data[n];
+async function createArticel(widget, data){
     
     //styling 
     const hstack = widget.addStack();
     hstack.layoutVertically();
     
-    const img = hstack.addImage(await loadImage(data.image))
+            
+    const img = hstack.addImage(await load_img(data.image));
     img.cornerRadius = 5;
     img.imageSize = new Size(85,48)
     
@@ -52,14 +46,13 @@ async function createArticel(widget, n){
 }
 
 
-async function get_data(n) {
-    const keywords = ["WEB.DE News","Business Insider Deutschland",""]
+async function load_data(n) {
+    const keywords = ["WEB.DE News","Business Insider Deutschland","Tichys Einblick", ""]
     
     const key = "04e98a94bb0d0734dee9eb90e9727d97";
     const url = "https://gnews.io/api/v4/top-headlines?category=world&lang=de&country=de&min=15&apikey="+key;
     const response = new Request(url);
     const raw_data = await response.loadJSON();
-
     for (let n in keywords) {
         for (let elem in raw_data.articles) {
             if (raw_data.articles[elem].source.name == keywords[n]) {
@@ -68,17 +61,16 @@ async function get_data(n) {
         }
 
     }
-    if (raw_data.articles[n] === undefined) {
-        n++;
+    console.log(raw_data);
+    while (true) {
+    	if (raw_data.articles[n] == undefined || raw_data.articles[n] == null) {
+        	n++;
+    	} else {
+            return raw_data.articles[n];
+        } 
     }
-    const data = raw_data.articles[n];
-
-    return data;
 }      
 
 async function load_img(url) {
     return await new Request(url).loadImage();
 }
-
-
-//fehler finden, bilder etc müssten korrekt sein testen gut 

@@ -1,30 +1,11 @@
+//written by Ben D
+//api credits: 
 const widget = await buildWidget();
 Script.setWidget(widget);
 
 widget.presentLarge();
 
 async function buildWidget() {
-    const keywords = ["WEB.DE News","Business Insider Deutschland",""]
-    
-    const key = "04e98a94bb0d0734dee9eb90e9727d97";
-    const url = "https://gnews.io/api/v4/top-headlines?category=world&lang=de&country=de&min=15&apikey="+key;
-    const response = new Request(url);
-    const raw_data = await response.loadJSON();
-
-    for (let n in keywords) {
-        for (let elem in raw_data.articles) {
-            if (raw_data.articles[elem].source.name == keywords[n]) {
-                delete (raw_data.articles[elem]);
-            }
-        }
-
-    }
-    let n = 1
-    if (raw_data.articles[n] === undefined) {
-        n++;
-    }
-    const data = raw_data.articles[n];
-
     let widget = new ListWidget();
     widget.setPadding(15,10,10,10)
     
@@ -42,23 +23,51 @@ async function buildWidget() {
     vstack.addSpacer();
     
     const hstack = widget.addStack();
-    hstack.layoutHorizontally();
+    hstack.layoutVertically();
     
-        
-    const imgurl = data.image;
-    const imgreq = new Request(imgurl);
-    const imgg = await imgreq.loadImage();
-    const imggg = load_img(data);
-    const img = hstack.addImage(await load_img(data.image));
-    img.cornerRadius = 5;
-    img.imageSize = new Size(85,48)
-    
-    hstack.addSpacer();
-
+    widget = createArticel(widget, load_data(1) );
 
     
     return widget;
 }
+
+async function createArticel(widget, data){
+    
+    //styling 
+    const hstack = widget.addStack();
+    hstack.layoutVertically();
+    
+    const img = hstack.addImage(await load_img(data.image));
+    img.cornerRadius = 5;
+    img.imageSize = new Size(85,48)
+    
+    return widget;
+}
+
+
+async function load_data(n) {
+    const keywords = ["WEB.DE News","Business Insider Deutschland",""]
+    
+    const key = "04e98a94bb0d0734dee9eb90e9727d97";
+    const url = "https://gnews.io/api/v4/top-headlines?category=world&lang=de&country=de&min=15&apikey="+key;
+    const response = new Request(url);
+    const raw_data = await response.loadJSON();
+
+    for (let n in keywords) {
+        for (let elem in raw_data.articles) {
+            if (raw_data.articles[elem].source.name == keywords[n]) {
+                delete (raw_data.articles[elem]);
+            }
+        }
+
+    }
+    if (raw_data.articles[n] === undefined) {
+        n++;
+    }
+    const data = raw_data.articles[n];
+
+    return data;
+}      
 
 async function load_img(url) {
     return await new Request(url).loadImage();
